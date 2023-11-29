@@ -1,6 +1,7 @@
 import logging
 
 station_url = "https://www.ncei.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt"
+station_data_url = "https://www.ncei.noaa.gov/pub/data/ghcn/daily/by_station/{station_id}.csv.gz"
 
 def _get_logger(name):
     """

@@ -3,8 +3,6 @@ from typing import List, Optional, Tuple
 import pandas as pd
 from pandas.io.parsers import read_fwf
 
-# import psycopg2
-# from psycopg2 import sql
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -15,8 +13,10 @@ class Loader:
     
     def create_table_if_not_exists(self, table, columns):
         # Create a formatted string for column definitions
-        columns_str = ', '.join([f'{name} {type}' for name, type in columns])
-
+        columns_str = ', '.join([f'"{name}" {type}' for name, type in columns])
+        
+        # self.db_handler.execute_query(f"""DROP TABLE {table};""")
+        
         query = """CREATE TABLE IF NOT EXISTS {table} 
                     ({columns_str})""".format(table=table, columns_str=columns_str)
 
@@ -32,7 +32,8 @@ class Loader:
         # data.to_sql(f'{table_name}', self.db_handler.engine, if_exists='replace', index=False)
 
         # Create a formatted string for the INSERT query
-        values_str = '%s, %s, %s, %s, %s'
+        values_str = """%s, %s, %s, %s, %s"""
+        values_str = ", ".join(["%s" for _ in columns])
         insert_query = """INSERT INTO {table_name} ({columns_str}) VALUES ({values_str})""".format(
             table_name=table_name,
             columns_str=columns_str,
@@ -42,7 +43,8 @@ class Loader:
         print(tuple(data.iloc[i,:].astype(str).values for i in range(4)))
 
         # Execute the INSERT query
-        self.db_handler.execute_query(insert_query, tuple(data.iloc[i,:].astype(str).values for i in range(4)))
+        self.db_handler.execute_query(insert_query, 
+                                      tuple(data.iloc[i,:].astype(str).values for i in range(len(data))))
 
         result = self.db_handler.execute_query(f"SELECT * FROM {table_name} LIMIT 10")
         print([row for row in result])

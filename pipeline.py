@@ -10,7 +10,7 @@ if __name__ == "__main__":
     # extracting and loading cities
     # ingest_extract_cities()
     
-    ingest_load_cities()
+    ingest_load_stations()
     
     city = "Berlin"
     logger.info("Pipeline execution complete check the database "\

@@ -1,5 +1,5 @@
 from weather_pipeline.utils import _get_logger
-from weather_pipeline.ingest.extract.extractor import webSource
+from weather_pipeline.extract.extractor import webSource
 
 class Extractor:
     """    

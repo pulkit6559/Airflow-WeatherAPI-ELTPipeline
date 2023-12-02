@@ -12,7 +12,8 @@ if __name__ == "__main__":
     
     # ingest_load_stations()
     # ingest_extract_station_data()
-    ingest_load_station_data()
+    # ingest_load_station_data()
+    transform_create_dimention_tables()
     city = "Berlin"
     logger.info("Pipeline execution complete check the database "\
                 f"for {city}_rank table to run a query for percentile rank.")

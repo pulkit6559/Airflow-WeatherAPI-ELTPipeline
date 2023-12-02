@@ -116,9 +116,35 @@ def ingest_load_station_data() -> None:
         station_id_df = station_id_df[[t[0] for t in required_col_types]]
             
         loader.load_csv_to_db(station_id_df, table_name = f"{station_id}", columns=required_col_types)
-        
-        
 
 
+def transform_create_dimention_tables() -> None:
+    """
+        PRCP = Precipitation (tenths of mm)
+        SNOW = Snowfall (mm)
+        SNWD = Snow depth (mm)
+        TMAX = Maximum temperature (tenths of degrees C)
+        TMIN = Minimum temperature (tenths of degrees C)
+    """
+    dimention_tables = ['PRCP', 'SNOW', 'SNWD', 'TMAX', 'TMIN']
+    
+    result = db_handler.execute_query(f"""SELECT "ID" FROM stations;""")
+    station_ids = [row[0] for row in result]
+    
+    loader = Loader(db_handler)
+    
+    req_columns = [("station_ID", "VARCHAR"), ("DATE", "DATE"), ("value", "REAL")]
+    
+    for tb in dimention_tables:
+        loader.create_table_if_not_exists(table=tb, columns=[("station_ID", "VARCHAR"), ("DATE", "DATE"), ("value", "REAL")])
+        for station in station_ids[:5]:
+            # get dimention values from station table
+            element_data = db_handler.execute_query("""SELECT "DATE", "DATA_VALUE" 
+                                                        FROM {station_id} 
+                                                        WHERE {station_id}."ELEMENT" = '{element_id}'; 
+                                                    """.format(station_id=station, element_id=tb))
+            element_data = [[station]+[str(e) for e in row] for row in element_data]
+            loader.load_list_to_db(element_data, table_name = f"{tb}", columns=req_columns)
+        
 
     

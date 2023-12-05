@@ -13,9 +13,9 @@ class Loader:
     
     def create_table_if_not_exists(self, table, columns):
         # Create a formatted string for column definitions
-        columns_str = ', '.join([f'"{name}" {type}' for name, type in columns])
+        columns_str = ', '.join([f'{name.lower()} {type}' for name, type in columns])
         
-        self.db_handler.execute_query(f"""DROP TABLE {table};""")
+        # self.db_handler.execute_query(f"""DROP TABLE IF EXISTS {table};""")
         
         query = """CREATE TABLE IF NOT EXISTS {table} 
                     ({columns_str})""".format(table=table, columns_str=columns_str)
@@ -27,7 +27,7 @@ class Loader:
         self.create_table_if_not_exists(table_name, columns)
 
         # Extract column names for the INSERT query
-        columns_str = ", ".join([f'"{name}"' for name, _ in columns])
+        columns_str = ", ".join([f'{name.lower()}' for name, _ in columns])
         
         # data.to_sql(f'{table_name}', self.db_handler.engine, if_exists='replace', index=False)
 
@@ -54,7 +54,7 @@ class Loader:
         self.create_table_if_not_exists(table_name, columns)
 
         # Extract column names for the INSERT query
-        columns_str = ", ".join([f'"{name}"' for name, _ in columns])
+        columns_str = ", ".join([f'{name}' for name, _ in columns])
         
         # data.to_sql(f'{table_name}', self.db_handler.engine, if_exists='replace', index=False)
 

@@ -9,13 +9,13 @@ delete_query = "DELETE FROM {table} WHERE {condition}"
 
 monthly_avg_by_station = """
 SELECT
-    station_id,
+    {table}.station_ID,
     EXTRACT(MONTH FROM date) AS month,
     AVG(value) AS avg_temperature
 FROM
-    {tb}
+    {table}
 WHERE
-    EXTRACT(YEAR FROM date) BETWEEN 1990 AND 2000
+    EXTRACT(YEAR FROM date) BETWEEN {start_year} AND {end_year}
 GROUP BY
     station_id, EXTRACT(MONTH FROM date)
 """

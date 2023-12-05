@@ -6,6 +6,7 @@ import shutil
 
 from weather_pipeline.extract import Extractor
 from weather_pipeline.load import Loader
+from weather_pipeline.transform import Transform
 from weather_pipeline.db_handler import DbHandler
 
 from weather_pipeline.utils import _get_logger, station_url, station_data_url
@@ -69,7 +70,7 @@ def ingest_extract_station_data() -> None:
     logger.info("Extracting and loading cities..")
     
     # get all station_id's
-    result = db_handler.execute_query(f"""SELECT "ID" FROM stations;""")
+    result = db_handler.execute_query(f"""SELECT id FROM stations;""")
     station_ids = [row[0] for row in result]
     
     print("stations_ids: ", station_ids)
@@ -98,7 +99,7 @@ def ingest_load_station_data() -> None:
     logger.info("Extracting and loading cities..")
     
     # get all station_id's
-    result = db_handler.execute_query(f"""SELECT "ID" FROM stations;""")
+    result = db_handler.execute_query(f"""SELECT ID FROM stations;""")
     station_ids = [row[0] for row in result]
     
     loader = Loader(db_handler)
@@ -126,9 +127,9 @@ def transform_create_dimention_tables() -> None:
         TMAX = Maximum temperature (tenths of degrees C)
         TMIN = Minimum temperature (tenths of degrees C)
     """
-    dimention_tables = ['PRCP', 'SNOW', 'SNWD', 'TMAX', 'TMIN']
+    dimention_tables = ['TMAX', 'TMIN']
     
-    result = db_handler.execute_query(f"""SELECT "ID" FROM stations;""")
+    result = db_handler.execute_query(f"""SELECT ID FROM stations;""")
     station_ids = [row[0] for row in result]
     
     loader = Loader(db_handler)
@@ -139,12 +140,20 @@ def transform_create_dimention_tables() -> None:
         loader.create_table_if_not_exists(table=tb, columns=[("station_ID", "VARCHAR"), ("DATE", "DATE"), ("value", "REAL")])
         for station in station_ids[:5]:
             # get dimention values from station table
-            element_data = db_handler.execute_query("""SELECT "DATE", "DATA_VALUE" 
+            element_data = db_handler.execute_query("""SELECT DATE, DATA_VALUE
                                                         FROM {station_id} 
-                                                        WHERE {station_id}."ELEMENT" = '{element_id}'; 
+                                                        WHERE {station_id}.ELEMENT = '{element_id}'; 
                                                     """.format(station_id=station, element_id=tb))
             element_data = [[station]+[str(e) for e in row] for row in element_data]
             loader.load_list_to_db(element_data, table_name = f"{tb}", columns=req_columns)
         
 
+def transform_get_monthly_temp_avg() -> None:
+    transform = Transform(db_handler)
+    result_cursor = transform.run("monthly_avg_by_station", table="TMAX", start_year="1990", end_year="2000")
+    
+    result = [row for row in result_cursor]
+    print(result)
+    
+    
     

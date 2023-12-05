@@ -1,1 +1,1 @@
-from weather_pipeline.transform.transformer import Transformer
+from weather_pipeline.transform.transformer import Transform

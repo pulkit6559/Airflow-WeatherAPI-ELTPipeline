@@ -2,6 +2,7 @@ import datetime
 import pandas as pd
 import gzip
 import shutil
+import json
 
 
 from weather_pipeline.extract import Extractor
@@ -154,6 +155,21 @@ def transform_get_monthly_temp_avg() -> None:
     
     result = [row for row in result_cursor]
     print(result)
+    
+    new_dict = {}
+    
+    for row in result:
+        station_id, month, avg_temperature = row
+        # print(type(month))
+        # Initialize station entry if not exists
+        new_dict.setdefault(station_id, {"max_avg": {}})
+
+        new_dict[station_id]["max_avg"][str(month)] = avg_temperature
+
+    with open('tmp/stations_avg_temp.json', 'w') as fp:
+        json.dump(new_dict, fp)
+    
+    print(new_dict)
     
     
     

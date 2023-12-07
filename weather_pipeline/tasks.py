@@ -15,7 +15,7 @@ from weather_pipeline.config import LOADER_DESTINATION, LOADER_CONNECTION_STRING
 
 logger = _get_logger(name=__name__)
 
-db_handler = DbHandler()
+db_handler = DbHandler(host='aws')
 
 
 def ingest_extract_stations() -> None:

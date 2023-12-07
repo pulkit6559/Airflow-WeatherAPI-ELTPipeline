@@ -8,15 +8,15 @@ from sqlalchemy.orm import sessionmaker
 
 
 class DbHandler:
-    def __init__(self, config_file='tmp/config.ini'):
+    def __init__(self, config_file='tmp/config.ini', host='default'):
         config = configparser.ConfigParser()
         config.read(config_file)
         print(config.sections())
-        db_user = config['database']['POSTGRES_USER']
-        db_password = config['database']['POSTGRES_PASSWORD']
-        db_host = config['database']['POSTGRES_HOST']
-        db_port = config['database']['POSTGRES_PORT']
-        db_name = config['database']['POSTGRES_DB']
+        db_user = config[host]['POSTGRES_USER']
+        db_password = config[host]['POSTGRES_PASSWORD']
+        db_host = config[host]['POSTGRES_HOST']
+        db_port = config[host]['POSTGRES_PORT']
+        db_name = config[host]['POSTGRES_DB']
         
         db_url = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
 

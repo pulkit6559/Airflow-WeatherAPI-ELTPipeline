@@ -10,10 +10,10 @@ if __name__ == "__main__":
     # extracting and loading cities
     # ingest_extract_cities()
     
-    # ingest_load_stations()
+    ingest_load_stations()
     # ingest_extract_station_data()
-    # ingest_load_station_data()
-    # transform_create_dimention_tables()
+    ingest_load_station_data()
+    transform_create_dimention_tables()
     transform_get_monthly_temp_avg()
     city = "Berlin"
     logger.info("Pipeline execution complete check the database "\

@@ -8,13 +8,13 @@ if __name__ == "__main__":
                 "challenge example")
     
     # extracting and loading cities
-    # ingest_extract_cities()
+    ingest_extract_stations()
     
-    # ingest_load_stations()
-    # ingest_extract_station_data()
-    # ingest_load_station_data()
-    # transform_create_dimention_tables()
+    ingest_load_stations()
+    ingest_extract_station_data()
+    ingest_load_station_data()
+    transform_create_dimention_tables()
     transform_get_monthly_temp_avg()
-    city = "Berlin"
-    logger.info("Pipeline execution complete check the database "\
-                f"for {city}_rank table to run a query for percentile rank.")
+
+    logger.info("Pipeline execution complete: " \
+                f"Check transformations in s3://{S3_BUCKET}/{S3_DIR}")

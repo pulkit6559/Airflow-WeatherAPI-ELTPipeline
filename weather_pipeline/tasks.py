@@ -3,6 +3,7 @@ import pandas as pd
 import gzip
 import shutil
 import json
+import os
 
 
 from weather_pipeline.extract import Extractor
@@ -11,11 +12,13 @@ from weather_pipeline.transform import Transform
 from weather_pipeline.db_handler import DbHandler
 
 from weather_pipeline.utils import _get_logger, station_url, station_data_url
-from weather_pipeline.config import LOADER_DESTINATION, LOADER_CONNECTION_STRING
+from weather_pipeline.config import LOADER_DESTINATION, LOADER_CONNECTION_STRING, S3_BUCKET, S3_DIR
+
+from aws_tasks import s3_single_upload, s3_multipart_upload
 
 logger = _get_logger(name=__name__)
 
-db_handler = DbHandler(host='aws')
+db_handler = DbHandler(host='default')
 
 
 def ingest_extract_stations() -> None:
@@ -96,7 +99,7 @@ def ingest_extract_station_data() -> None:
     logger.info("Extraction of stations yearly data: Done") 
 
 
-def ingest_load_station_data() -> None:
+def ingest_load_station_data(mode="PG_CONN") -> None:
     logger.info("Extracting and loading cities..")
     
     # get all station_id's
@@ -107,17 +110,32 @@ def ingest_load_station_data() -> None:
     
     for station_id in station_ids[:5]:
         # define extractor
-        station_csv_pth = f"tmp/{station_id}.csv"
+        if mode=="DMS":
+            print("DMS Ingestion: TBD")
+            # multipart upload -> s3_upload
+            # s3_multipart_upload(file_path=f"tmp/{station_id}.csv", 
+            #                     bucket_name="iambucketnew", 
+            #                     object_key=f"stations_data/{station_id}.csv",
+            #                     region_name='eu-central-1')
         
-        station_id_df = pd.read_csv(station_csv_pth, header=None)
-        columns = ["ID", "DATE", "ELEMENT", "DATA_VALUE", "M-FLAG", "Q-FLAG", "S-FLAG", "OBS-TIME"]
-        station_id_df.columns = columns
-        
-        required_col_types = [("ID", "VARCHAR"), ("DATE", "DATE"), ("ELEMENT", "VARCHAR"), ("DATA_VALUE", "REAL")]
-        
-        station_id_df = station_id_df[[t[0] for t in required_col_types]]
+            # create table {station_id}
             
-        loader.load_csv_to_db(station_id_df, table_name = f"{station_id}", columns=required_col_types)
+            # dms setup -> create_dms_task
+            # dms migrate -> migrate file
+            
+            continue
+        else:
+            station_csv_pth = f"tmp/{station_id}.csv"
+            
+            station_id_df = pd.read_csv(station_csv_pth, header=None)
+            columns = ["ID", "DATE", "ELEMENT", "DATA_VALUE", "M-FLAG", "Q-FLAG", "S-FLAG", "OBS-TIME"]
+            station_id_df.columns = columns
+            
+            required_col_types = [("ID", "VARCHAR"), ("DATE", "DATE"), ("ELEMENT", "VARCHAR"), ("DATA_VALUE", "REAL")]
+            
+            station_id_df = station_id_df[[t[0] for t in required_col_types]]
+                
+            loader.load_csv_to_db(station_id_df, table_name = f"{station_id}", columns=required_col_types)
 
 
 def transform_create_dimention_tables() -> None:
@@ -168,6 +186,8 @@ def transform_get_monthly_temp_avg() -> None:
 
     with open('tmp/stations_avg_temp.json', 'w') as fp:
         json.dump(new_dict, fp)
+    
+    s3_single_upload('tmp/stations_avg_temp.json', S3_BUCKET, S3_DIR+"/stations_avg_temp.json")
     
     print(new_dict)
     

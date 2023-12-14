@@ -45,9 +45,9 @@ def execute_create_dimension_tables(*args, **kwargs):
     logger.info("Executing create_dimension_tables task")
     transform_create_dimention_tables()
 
-def execute_get_monthly_temp_avg(*args, **kwargs):
+def execute_station_monthly_temp_avg(*args, **kwargs):
     logger.info("Executing get_monthly_temp_avg task")
-    transform_get_monthly_temp_avg()
+    transform_station_monthly_temp_avg()
 
 # Define PythonOperators for each task
 extract_stations_task = PythonOperator(
